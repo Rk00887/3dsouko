@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(cd:*)",
+      "Bash(nest new:*)",
+      "Bash(psql:*)",
+      "Bash(where psql:*)",
+      "Read(//c/Program Files/**)"
+    ]
+  }
+}
