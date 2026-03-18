@@ -5,7 +5,7 @@
  * {
  *   name: "Layout 1",
  *   savedAt: "2026-03-14T...",
- *   warehouse: { width: 80, depth: 50 },
+ *   warehouse: { width: 80, depth: 50, height: 10 },
  *   objects: [
  *     { type:"rack", x, y, z, rotY, userData:{...} },
  *     ...
@@ -58,12 +58,13 @@ export class LayoutManager {
 
   // ─── 保存・読込 ─────────────────────────────────────
 
-  /** localStorageに保存（API接続前のフォールバック） */
-  save(name = '') {
+  /** localStorageに保存 */
+  save(name = '', warehouseInfo = null) {
     const layoutName = name || `Layout ${new Date().toLocaleString('ja-JP')}`
     const data = {
       name:      layoutName,
       savedAt:   new Date().toISOString(),
+      warehouse: warehouseInfo,
       objects:   this.serialize(),
     }
 
@@ -76,41 +77,26 @@ export class LayoutManager {
     return layoutName
   }
 
-  /** APIへ保存（バックエンド接続時） */
-  async saveToApi(name, warehouseId, layoutApi) {
-    const objects = this.serialize()
-    return layoutApi.save({ warehouseId, name, objects })
-  }
-
-  /** APIからロード（バックエンド接続時） */
-  async loadFromApi(layoutId, builders, layoutApi) {
-    const data = await layoutApi.get(layoutId)
-    if (!data?.objectsJson) return false
-    this._pushHistory()
-    this._future = []
-    this.deserialize(data.objectsJson, builders)
-    return true
-  }
-
   /** 保存済みレイアウト一覧を取得 */
   getSavedList() {
     return this._loadAll().map((l) => ({
-      name:    l.name,
-      savedAt: l.savedAt,
-      count:   l.objects.length,
+      name:      l.name,
+      savedAt:   l.savedAt,
+      count:     l.objects.length,
+      warehouse: l.warehouse ?? null,
     }))
   }
 
-  /** 名前を指定してロード */
+  /** 名前を指定してロード。成功時は保存データ全体を返す（warehouse情報含む）*/
   load(name, builders) {
     const all  = this._loadAll()
     const data = all.find((l) => l.name === name)
-    if (!data) return false
+    if (!data) return null
 
     this._pushHistory()
     this._future = []
     this.deserialize(data.objects, builders)
-    return true
+    return data  // { name, savedAt, warehouse, objects }
   }
 
   /** 保存済みレイアウトを削除 */
