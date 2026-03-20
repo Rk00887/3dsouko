@@ -2,7 +2,7 @@
   <div class="modal-overlay">
     <div class="modal">
 
-      <div class="modal-title">添加托盘</div>
+      <div class="modal-title">パレットを追加</div>
 
       <!-- 预设 -->
       <div class="preset-row">
@@ -13,17 +13,17 @@
         >{{ p.label }}</button>
       </div>
 
-      <!-- 尺寸 + 重量 -->
+      <!-- 寸法 + 重量 -->
       <div class="form-grid">
-        <label>长 ({{ unit }})</label>
+        <label>幅 ({{ unit }})</label>
         <input v-model.number="display.width"  type="number" :step="dimStep"
           :min="toDisplay(0.3)" :max="toDisplay(5)" @input="onDimInput('width',  form, display); markCustom()" />
 
-        <label>宽 ({{ unit }})</label>
+        <label>奥行 ({{ unit }})</label>
         <input v-model.number="display.depth"  type="number" :step="dimStep"
           :min="toDisplay(0.3)" :max="toDisplay(5)" @input="onDimInput('depth',  form, display); markCustom()" />
 
-        <label>高 ({{ unit }})</label>
+        <label>高さ ({{ unit }})</label>
         <input v-model.number="display.height" type="number" :step="dimStep"
           :min="toDisplay(0.05)" :max="toDisplay(1)" @input="onDimInput('height', form, display); markCustom()" />
 
@@ -32,7 +32,7 @@
           @input="markCustom()" />
       </div>
 
-      <!-- 预览 -->
+      <!-- プレビュー -->
       <div class="preview-info">
         <span>{{ toDisplay(form.width) }} × {{ toDisplay(form.depth) }} × {{ toDisplay(form.height) }} {{ unit }}</span>
         <span class="sep">·</span>
@@ -40,8 +40,8 @@
       </div>
 
       <div class="modal-actions">
-        <button class="modal-btn" @click="$emit('cancel')">取消</button>
-        <button class="modal-btn primary" @click="confirm">添加到场景</button>
+        <button class="modal-btn" @click="$emit('cancel')">キャンセル</button>
+        <button class="modal-btn primary" @click="confirm">シーンに追加</button>
       </div>
     </div>
   </div>

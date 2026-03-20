@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional, Min, IsIn } from 'class-validator'
+import { IsString, IsNumber, IsBoolean, IsOptional, Min, IsIn } from 'class-validator'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 
 export class CreateSkuDto {
@@ -23,12 +23,12 @@ export class CreateSkuDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  length?: number
+  width?: number
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  width?: number
+  depth?: number
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -45,4 +45,15 @@ export class CreateSkuDto {
   @IsNumber()
   @Min(1)
   boxQty?: number
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  stackable?: boolean
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  maxStack?: number
 }

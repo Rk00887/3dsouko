@@ -2,7 +2,15 @@
 
 > **製品カテゴリ：** Warehouse Layout Planner / Warehouse Digital Twin
 > **ターゲット市場：** 日本物流業界
-> **最終更新：** 2026-03-14
+> **最終更新：** 2026-03-19（実装状況反映）
+
+> ### 実装状況サマリー（2026-03-19時点）
+> | フェーズ | 完成度 | 備考 |
+> |---|---|---|
+> | Phase 1（基礎版）| **90%** ✅ | 3Dエディター・容量計算ほぼ完成 |
+> | Phase 2（計算版）| **60%** ⚠️ | ヒートマップ・通路検証実装済み、レポート出力未確認 |
+> | Phase 3（規画版）| **20%** ⚠️ | 自動配置スケルトンのみ、GAアルゴリズム未実装 |
+> | Phase 4-5（デジタルツイン）| **0%** ❌ | DBテーブル設計のみ、ロジック未実装 |
 
 ---
 
@@ -27,6 +35,7 @@
 11. [市場・商業設計](#市場商業設計)
 12. [開発難易度・工数](#開発難易度工数)
 13. [参考情報](#参考情報)
+14. [実装詳細（コード確認済み）](#実装詳細コード確認済み)
 
 ---
 
@@ -116,18 +125,18 @@ Rack（棚） → Pallet（パレット） → Inventory（在庫）
 
 ### 10モジュール構成
 
-| # | モジュール | 主要機能 |
-|---|---|---|
-| 1 | 倉庫空間システム | 倉庫スペース作成（幅・奥行・高さ・ゾーン） |
-| 2 | モデルライブラリ | 棚・パレット・箱・フォークリフト・AGV |
-| 3 | レイアウトエディター | ドラッグ・回転・複製・削除・グリッドスナップ |
-| 4 | SKUシステム | SKU管理・箱・パレット紐付け |
-| 5 | 在庫システム | 在庫登録・移動・ロケーション管理 |
-| 6 | 計算エンジン | 面積・棚数・パレット数・SKU容量計算 |
-| 7 | 規画アルゴリズム | 自動棚配置・通路生成・利用率最適化 |
-| 8 | パス計算 | AGV・フォークリフト経路（A*） |
-| 9 | データ可視化 | 熱度マップ・利用率グラフ |
-| 10 | レポートシステム | Excel / PDF エクスポート |
+| # | モジュール | 主要機能 | 実装状況 |
+|---|---|---|---|
+| 1 | 倉庫空間システム | 倉庫スペース作成（幅・奥行・高さ・ゾーン） | ✅ 実装済み |
+| 2 | モデルライブラリ | 棚・パレット・箱・フォークリフト・AGV | ✅ 実装済み |
+| 3 | レイアウトエディター | ドラッグ・回転・複製・削除・グリッドスナップ | ✅ 実装済み |
+| 4 | SKUシステム | SKU管理・箱・パレット紐付け | ✅ 実装済み |
+| 5 | 在庫システム | 在庫登録・移動・ロケーション管理 | ✅ 実装済み |
+| 6 | 計算エンジン | 面積・棚数・パレット数・SKU容量計算 | ✅ 実装済み |
+| 7 | 規画アルゴリズム | 自動棚配置・通路生成・利用率最適化 | ⚠️ スケルトンのみ（GAは未実装） |
+| 8 | パス計算 | AGV・フォークリフト経路（A*） | ❌ DBテーブルのみ（未実装） |
+| 9 | データ可視化 | 熱度マップ・利用率グラフ | ✅ 実装済み（スペース・重量2種） |
+| 10 | レポートシステム | Excel / PDF エクスポート | ⚠️ UIコンポーネント存在（詳細未確認） |
 
 ### プロジェクト構造（Monorepo）
 
@@ -464,19 +473,27 @@ TransformControls アタッチ
 
 ### エディター機能一覧
 
-| 機能 | 詳細 |
-|---|---|
-| ドラッグ移動 | DragControls + グリッドスナップ |
-| 回転 | TransformControls（Rモード） |
-| スケール | TransformControls（Sモード） |
-| 複製 | 選択オブジェクトのClone |
-| 削除 | シーンから除去 + DB削除 |
-| グリッド | GridHelper + スナップ |
-| 整列 | 選択複数オブジェクトの座標揃え |
-| 一括生成 | 行列指定で棚を自動配置 |
-| Undo/Redo | Command Pattern |
-| 保存 | layout_objectテーブルへ永続化 |
-| 読込 | DBからJSONロード → 3D復元 |
+| 機能 | 詳細 | 実装状況 |
+|---|---|---|
+| ドラッグ移動 | DragControls + グリッドスナップ + 衝突検出 | ✅ |
+| 回転 | TransformControls（Rモード） | ✅ |
+| スケール | TransformControls（Sモード） | ✅ |
+| 複製 | 選択オブジェクトのClone | ✅ |
+| 削除 | シーンから除去 + DB削除 | ✅ |
+| グリッド | GridHelper + スナップ（0.1〜2m可調） | ✅ |
+| 整列 | 選択複数オブジェクトの座標揃え・等間隔配置 | ✅ |
+| 一括生成 | 行列指定で棚を自動配置 | ✅ |
+| Undo/Redo | Command Pattern（MAX_HISTORY=50） | ✅ |
+| 保存 | layout_objectテーブルへ永続化 | ✅ |
+| 読込 | DBからJSONロード → 3D復元 | ✅ |
+| 複数選択 | Shift+クリック | ✅ |
+| トップビュー | 真上図表示切替 | ✅ |
+| カメラブックマーク | 3スロット保存・移動 | ✅ |
+| 計測ツール | 2点距離計測 | ✅ |
+| 注釈モード | ピンコメント設置 | ✅ |
+| FPSウォークスルー | PointerLock による一人称視点 | ✅ |
+| 衝突検出 | ドラッグ中の物理判定（棚・パレット・箱） | ✅ |
+| ラベルシステム | 自動採番・スプライトレンダリング | ✅ |
 
 ---
 
@@ -544,16 +561,20 @@ TransformControls アタッチ
 
 ```
 algorithms/
-├── rack-layout/        自動棚配置
-├── pallet-packing/     パレット最適積載
-├── carton-packing/     3D装箱（3D Bin Packing）
-├── capacity/           容量計算エンジン
-└── pathfinding/        A*経路探索
+├── AutoLayout.js       自動棚配置（基本実装済み、GA未実装）     ⚠️
+├── CapacityEngine.js   容量計算エンジン（完全実装）             ✅
+├── SpaceHeatmap.js     スペース利用率ヒートマップ               ✅
+├── WeightHeatmap.js    重量荷重ヒートマップ（8バケット）        ✅
+├── AisleAnalysis.js    通路幅検証（フォークリフト・人力）       ✅
+└── ClearanceCalc.js    クリアランス計算（4方向隙間）            ✅
+
+※ pallet-packing / carton-packing / pathfinding は CapacityEngine に統合
+※ A* 経路探索は DBテーブル設計のみ（実装未着手）               ❌
 ```
 
 ---
 
-### 1. 自動棚配置アルゴリズム（rack-layout）
+### 1. 自動棚配置アルゴリズム（rack-layout）⚠️ 基本実装済み・GA未実装
 
 **基礎アルゴリズム：行列配置**
 
@@ -568,7 +589,7 @@ algorithms/
 - 倉庫奥行 80m、棚奥行 2.5m → `floor(80/2.5) = 32組`
 - 総棚数 = 7 × 32 = **224組**
 
-**高度アルゴリズム：遺伝的アルゴリズム（GA）による最適化**
+**高度アルゴリズム：遺伝的アルゴリズム（GA）による最適化** ❌ 未実装
 
 ```
 Step1: ランダムなレイアウト集団を生成
@@ -579,9 +600,11 @@ Step5: 突然変異（Mutation）
 Step6: 繰り返し → 最適解に収束
 ```
 
+> **現在の実装（AutoLayout.js）**：行列配置 + ABC配置最適化（generateWarehouseLayout / optimizeAbcPlacement）までは実装済み。
+
 ---
 
-### 2. 3D装箱アルゴリズム（carton-packing）
+### 2. 3D装箱アルゴリズム（carton-packing）✅ CapacityEngine に実装済み
 
 **問題の本質：3D Bin Packing Problem**
 
@@ -628,7 +651,7 @@ Step6: 繰り返し → 最適解に収束
 
 ---
 
-### 3. SKU熱度分析 / ABCランク分類
+### 3. SKU熱度分析 / ABCランク分類 ✅ 実装済み
 
 **SKU熱度（ピッキング頻度）に基づく棚配置最適化**
 
@@ -648,7 +671,7 @@ distance = sqrt(x² + y²)
 
 ---
 
-### 4. A* 経路探索（pathfinding）
+### 4. A* 経路探索（pathfinding）❌ DBテーブル設計のみ・未実装
 
 AGV・フォークリフトの最短経路計算。
 
@@ -708,12 +731,12 @@ A*アルゴリズム
 
 ### バージョン別機能
 
-| バージョン | 機能 | 工数目安 |
-|---|---|---|
-| v1 基礎版 | 3D倉庫建模 + 棚ドラッグ + レイアウト保存 | 3〜4週 |
-| v2 計算版 | SKU容量計算 + 面積計算 + レポート | 2週 |
-| v3 規画版 | 自動棚配置 + 通路生成 + 利用率最適化 | 4週 |
-| v4 孪生版 | WMS連携 + リアルタイム在庫 + AGV経路 | 要別途設計 |
+| バージョン | 機能 | 工数目安 | 実装状況 |
+|---|---|---|---|
+| v1 基礎版 | 3D倉庫建模 + 棚ドラッグ + レイアウト保存 | 3〜4週 | ✅ 90%完成 |
+| v2 計算版 | SKU容量計算 + 面積計算 + ヒートマップ | 2週 | ✅ 60%完成 |
+| v3 規画版 | 自動棚配置 + 通路生成 + 利用率最適化 | 4週 | ⚠️ 20%（スケルトン） |
+| v4 孪生版 | WMS連携 + リアルタイム在庫 + AGV経路 | 要別途設計 | ❌ 未着手 |
 
 ### フェーズロードマップ
 
@@ -815,17 +838,83 @@ A*アルゴリズム
 
 ### API設計の方向性（NestJS）
 
+**実装済みエンドポイント（2026-03-19確認）**
+
 ```
-GET  /warehouses
-POST /warehouses
+GET    /warehouses             ✅
+POST   /warehouses             ✅
+GET    /warehouses/:id         ✅
+PUT    /warehouses/:id         ✅
+DELETE /warehouses/:id         ✅
 
-GET  /layouts/:id
-POST /layouts
+GET    /layouts?warehouseId=X  ✅
+GET    /layouts/:id            ✅
+POST   /layouts                ✅ (upsert)
+DELETE /layouts/:id            ✅
 
-GET  /skus
-POST /skus
+GET    /skus                   ✅
+POST   /skus                   ✅
+GET    /skus/:id               ✅
+PUT    /skus/:id               ✅
+DELETE /skus/:id               ✅
+POST   /skus/calculate         ✅ 容量計算
 
-POST /calculate/capacity     // SKU → 面積
-POST /calculate/max-sku      // 面積 → 最大SKU
-POST /generate/layout        // 自動レイアウト生成
+GET    /inventory              ✅
+POST   /inventory              ✅
+PUT    /inventory/:id          ✅
+DELETE /inventory/:id          ✅
+
+POST /calculate/capacity       ❌ 未実装（フロント側で完結）
+POST /calculate/max-sku        ❌ 未実装（フロント側で完結）
+POST /generate/layout          ❌ 未実装
 ```
+
+---
+
+## 実装詳細（コード確認済み）
+
+> 2026-03-19 コードベース全体を確認し、設計文書へ反映。
+
+### フロントエンド実装ファイル
+
+| ファイル | 規模 | 機能 |
+|---|---|---|
+| `three/core/SceneManager.js` | 1,107行 | 3Dエンジン全体（レンダリング・選択・ドラッグ・衝突・カメラ） |
+| `three/core/LayoutManager.js` | 148行 | JSON保存・Undo/Redo |
+| `three/objects/RackBuilder.js` | 150行 | 重量棚・中量棚（可変段数・隔板） |
+| `three/objects/EquipmentBuilder.js` | 242行 | フォークリフト・AGV・作業台・コンベア |
+| `three/objects/StructureBuilder.js` | 128行 | 柱・ドア・通路・作業エリア |
+| `three/objects/FlowPathBuilder.js` | 133行 | 動線矢印可視化 |
+| `three/objects/WarehouseFrameBuilder.js` | 78行 | 倉庫枠（床・壁・天井輪郭） |
+| `three/algorithms/CapacityEngine.js` | 151行 | 容量計算（双方向・回転最適化） |
+| `three/algorithms/AutoLayout.js` | 126行 | 自動棚配置・ABC配置 |
+| `three/algorithms/SpaceHeatmap.js` | 128行 | スペース利用率ヒートマップ |
+| `three/algorithms/WeightHeatmap.js` | 169行 | 重量荷重ヒートマップ（8バケット） |
+| `three/algorithms/AisleAnalysis.js` | 165行 | 通路幅検証 |
+| `three/algorithms/ClearanceCalc.js` | 82行 | クリアランス計算（4方向） |
+| `components/WarehouseEditor.vue` | 3,338行 | メイン編集UI・ツールバー・パネル統合 |
+| `components/CapacityPanel.vue` | 372行 | 容量計算UI |
+| `components/InventoryPanel.vue` | 501行 | 在庫管理UI |
+| `components/SKUManagerDialog.vue` | 400行 | SKU登録・編集 |
+| `components/BinPackDialog.vue` | 379行 | 3D積付シミュレーション |
+| `components/ReportPanel.vue` | 316行 | レポート出力（Excel/PDF） |
+
+### バックエンド実装ファイル
+
+| モジュール | エンティティ主要フィールド |
+|---|---|
+| warehouse | id, name, width, length, height, floorType |
+| layout | id, warehouseId, name, version, isActive, objectsJson (JSONB) |
+| sku | id, skuCode(UNIQUE), name, category, abcRank, 寸法, 重量, boxQty |
+| inventory | id, warehouseId, skuId, quantity, location(JSONB), status |
+
+### 技術仕様（実測値）
+
+- **Renderer**: WebGL, PCFShadowMap
+- **Camera**: Perspective 50°, Near 0.1m / Far 1000m, 初期位置 (30, 30, 30)
+- **OrbitControls**: damping 0.08, 最小距離 5m / 最大 150m
+- **Backend Port**: 3001
+- **Frontend Port**: 5173 (dev) / 4173 (preview)
+- **CORS**: localhost:5173, localhost:4173
+- **API Prefix**: `/api`
+- **Swagger**: `/api/docs`

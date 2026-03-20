@@ -2,7 +2,21 @@
 
 > **対象フェーズ：** Phase 3〜5（WMS連携 / AGVパス / デジタルツイン）
 > **前提：** [DESIGN.md](./DESIGN.md) の基礎設計を理解していること
-> **最終更新：** 2026-03-14
+> **最終更新：** 2026-03-19（実装状況反映）
+
+> ### 実装状況（2026-03-19時点）
+> このドキュメントが対象とする Phase 3〜5 は **全て未実装**。
+> DBテーブル（migration 007_wms_agv.sql）は設計・定義済みだが、
+> NestJS ロジック・フロントエンド連携・リアルタイム通信は着手していない。
+>
+> | 機能 | DBテーブル | ロジック | UI |
+> |---|---|---|---|
+> | WMS連携 | ✅ location_mapping | ❌ | ❌ |
+> | AGVパス計算 | ✅ agv, agv_task, grid_map | ❌ | ❌ |
+> | IoTセンサー | ✅ sensor_reading | ❌ | ❌ |
+> | リアルタイム在庫 | ✅ inventory_snapshot | ❌ | ❌ |
+> | アラート | ✅ alert_log | ❌ | ❌ |
+> | デジタルツイン | ✅ simulation_scenario | ❌ | ❌ |
 
 ---
 
@@ -20,6 +34,8 @@
 ---
 
 ## WMS連携設計
+
+> **実装状況**: ❌ 未実装（DBテーブル `location_mapping`, `wms_sync_log`, `api_key` のみ定義済み）
 
 ### WMSとは
 
@@ -176,6 +192,8 @@ ABC123, A-01-02-03, 500, 2026-03-14 10:00:00
 ---
 
 ## AGVパス計算システム
+
+> **実装状況**: ❌ 未実装（DBテーブル `agv`, `agv_task`, `grid_map`, `path_node`, `path_edge` は定義済み。A*アルゴリズム・3Dアニメーションは未着手）
 
 ### AGVとは
 
@@ -340,6 +358,8 @@ AGVモデルをパスに沿って移動アニメーション
 
 ## デジタルツイン設計
 
+> **実装状況**: ❌ 未実装（DBテーブル `inventory_snapshot`, `sensor_reading`, `simulation_scenario`, `alert_log` は定義済み。WebSocket・Redis・MQTT・TimescaleDB は未導入）
+
 ### デジタルツインとは
 
 **デジタルツイン（Digital Twin）** は現実の倉庫の状態をリアルタイムで3D空間に忠実に再現するシステム。
@@ -412,6 +432,8 @@ Three.js実装方針：
 ---
 
 ## リアルタイム通信設計
+
+> **実装状況**: ❌ 未実装（Socket.io・Redis は未導入。NestJS WebSocket Gateway 未作成）
 
 ### WebSocket アーキテクチャ
 
@@ -489,6 +511,8 @@ Socket.io
 ---
 
 ## 拡張データベース設計
+
+> **実装状況**: ✅ マイグレーションファイル（`007_wms_agv.sql`）にて全テーブル定義済み。NestJSエンティティ・サービスは未作成。
 
 ### デジタルツイン用追加テーブル
 
@@ -616,6 +640,8 @@ created_at
 
 ## セキュリティ設計
 
+> **実装状況**: ❌ 未実装（JWT・RBAC・HMAC署名検証は未導入。現状は認証なし）
+
 ### 認証・認可
 
 | 層 | 実装 |
@@ -643,6 +669,8 @@ created_at
 ---
 
 ## クラウド展開設計
+
+> **実装状況**: ❌ 未実装（現在は Docker Compose でローカル開発環境のみ。PostgreSQL 16 + pgAdmin の構成）
 
 ### 推奨インフラ構成
 

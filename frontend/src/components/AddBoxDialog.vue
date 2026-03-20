@@ -2,7 +2,7 @@
   <div class="modal-overlay">
     <div class="modal">
 
-      <div class="modal-title">添加箱子</div>
+      <div class="modal-title">カートンケースを追加</div>
 
       <!-- SKU選択 -->
       <div class="sku-select-row">
@@ -24,17 +24,17 @@
         >{{ p.label }}</button>
       </div>
 
-      <!-- 尺寸 + 重量 -->
+      <!-- 寸法 + 重量 -->
       <div class="form-grid">
-        <label>长 ({{ unit }})</label>
+        <label>幅 ({{ unit }})</label>
         <input v-model.number="display.width"  type="number" :step="dimStep"
           :min="toDisplay(0.1)" :max="toDisplay(3)" @input="onDimInput('width',  form, display); markCustom()" />
 
-        <label>宽 ({{ unit }})</label>
+        <label>奥行 ({{ unit }})</label>
         <input v-model.number="display.depth"  type="number" :step="dimStep"
           :min="toDisplay(0.1)" :max="toDisplay(3)" @input="onDimInput('depth',  form, display); markCustom()" />
 
-        <label>高 ({{ unit }})</label>
+        <label>高さ ({{ unit }})</label>
         <input v-model.number="display.height" type="number" :step="dimStep"
           :min="toDisplay(0.1)" :max="toDisplay(3)" @input="onDimInput('height', form, display); markCustom()" />
 
@@ -43,15 +43,15 @@
           @input="markCustom()" />
       </div>
 
-      <!-- 堆叠选项 -->
+      <!-- 積み重ね設定 -->
       <div class="stack-section">
         <label class="stack-toggle-label">
           <input type="checkbox" v-model="form.stackable" @change="markCustom()" />
-          <span>可堆叠</span>
+          <span>積み重ね可</span>
         </label>
         <transition name="fade">
           <div v-if="form.stackable" class="stack-max-row">
-            <label>最大堆叠层数</label>
+            <label>最大積み重ね段数</label>
             <div class="stack-counter">
               <button @click="decStack">−</button>
               <span>{{ form.maxStack }}</span>
@@ -61,19 +61,19 @@
         </transition>
       </div>
 
-      <!-- 预览 -->
+      <!-- プレビュー -->
       <div class="preview-info">
         <span>{{ toDisplay(form.width) }} × {{ toDisplay(form.depth) }} × {{ toDisplay(form.height) }} {{ unit }}</span>
         <span class="sep">·</span>
         <span>重 <strong>{{ form.weight }}</strong> kg</span>
         <span class="sep">·</span>
-        <span v-if="form.stackable">可堆 <strong>{{ form.maxStack }}</strong> 层</span>
-        <span v-else class="tag-no">不可堆叠</span>
+        <span v-if="form.stackable">最大 <strong>{{ form.maxStack }}</strong> 段積み</span>
+        <span v-else class="tag-no">積み重ね不可</span>
       </div>
 
       <div class="modal-actions">
-        <button class="modal-btn" @click="$emit('cancel')">取消</button>
-        <button class="modal-btn primary" @click="confirm">添加到场景</button>
+        <button class="modal-btn" @click="$emit('cancel')">キャンセル</button>
+        <button class="modal-btn primary" @click="confirm">シーンに追加</button>
       </div>
     </div>
   </div>
@@ -203,7 +203,7 @@ function confirm() {
 }
 .form-grid input:focus { outline: none; border-color: #3366cc; background: #fff; }
 
-/* 堆叠选项 */
+/* 積み重ね設定 */
 .stack-section {
   border: 1px solid #eaecf0; border-radius: 8px; padding: 12px;
   display: flex; flex-direction: column; gap: 10px;
@@ -237,7 +237,7 @@ function confirm() {
 .fade-enter-active, .fade-leave-active { transition: opacity 0.15s, transform 0.15s; }
 .fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(-4px); }
 
-/* 预览 */
+/* プレビュー */
 .preview-info {
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
   padding: 10px 14px; background: #f0f6ff; border-radius: 8px;

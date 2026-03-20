@@ -23,19 +23,22 @@
           </div>
 
           <div class="sku-list">
-            <div
-              v-for="sku in filteredList"
-              :key="sku.id"
-              :class="['sku-item', selectedId === sku.id && 'active']"
-              @click="selectSKU(sku)"
-            >
-              <div class="sku-code">{{ sku.skuCode }}</div>
-              <div class="sku-name">{{ sku.name }}</div>
-              <div class="sku-dim">{{ fmt(sku.width) }} × {{ fmt(sku.depth) }} × {{ fmt(sku.height) }} m</div>
-            </div>
-            <div v-if="filteredList.length === 0" class="sku-empty">
-              {{ searchQuery ? '検索結果なし' : 'SKUがありません' }}
-            </div>
+            <div v-if="loading" class="sku-empty">読み込み中...</div>
+            <template v-else>
+              <div
+                v-for="sku in filteredList"
+                :key="sku.id"
+                :class="['sku-item', selectedId === sku.id && 'active']"
+                @click="selectSKU(sku)"
+              >
+                <div class="sku-code">{{ sku.skuCode }}</div>
+                <div class="sku-name">{{ sku.name }}</div>
+                <div class="sku-dim">{{ fmt(sku.width) }} × {{ fmt(sku.depth) }} × {{ fmt(sku.height) }} m</div>
+              </div>
+              <div v-if="filteredList.length === 0" class="sku-empty">
+                {{ searchQuery ? '検索結果なし' : 'SKUがありません' }}
+              </div>
+            </template>
           </div>
 
           <button class="btn-new" @click="newSKU">＋ 新規 SKU</button>
@@ -71,9 +74,9 @@
               <input v-model.number="form.weight" type="number" step="0.5" min="0" class="form-input-num" />
 
               <label class="section-sep" />
-              <div class="section-label">堆叠設定</div>
+              <div class="section-label">積み重ね設定</div>
 
-              <label>可堆叠</label>
+              <label>積み重ね可</label>
               <label class="checkbox-label">
                 <input type="checkbox" v-model="form.stackable" />
                 <span>{{ form.stackable ? 'はい' : 'いいえ' }}</span>
@@ -89,16 +92,19 @@
             <div class="form-preview">
               {{ fmt(form.width) }} × {{ fmt(form.depth) }} × {{ fmt(form.height) }} m
               · {{ form.weight }} kg
-              <span v-if="form.stackable"> · 可堆 {{ form.maxStack }} 段</span>
+              <span v-if="form.stackable"> · 最大 {{ form.maxStack }} 段積み</span>
             </div>
+
+            <!-- エラー -->
+            <div v-if="errorMsg" class="form-error">{{ errorMsg }}</div>
 
             <!-- アクション -->
             <div class="form-actions">
               <button v-if="form.id" class="btn-delete" @click="confirmDelete">🗑 削除</button>
               <div class="form-actions-right">
                 <button class="btn-cancel" @click="cancelEdit">キャンセル</button>
-                <button class="btn-save" @click="saveSKU" :disabled="!isFormValid">保存</button>
-                <button class="btn-place" @click="placeBox" :disabled="!isFormValid">
+                <button class="btn-save" @click="saveSKU" :disabled="!isFormValid || loading">{{ loading ? '保存中...' : '保存' }}</button>
+                <button class="btn-place" @click="placeBox" :disabled="!isFormValid || loading">
                   📦 箱を配置
                 </button>
               </div>
@@ -122,10 +128,11 @@ import { getAllSKUs, searchSKUs, saveSKU as storeSave, deleteSKU as storeDelete 
 
 const emit = defineEmits(['close', 'place-box'])
 
-const searchQuery = ref('')
-const allList     = ref([])
+const searchQuery  = ref('')
 const filteredList = ref([])
-const selectedId  = ref(null)
+const selectedId   = ref(null)
+const loading      = ref(false)
+const errorMsg     = ref('')
 
 const form = reactive({
   editing:   false,
@@ -144,17 +151,29 @@ const isFormValid = computed(
   () => form.skuCode.trim() && form.name.trim() && form.width > 0 && form.depth > 0 && form.height > 0
 )
 
-function fmt(v) { return (v ?? 0).toFixed(2) }
+function fmt(v) { return (parseFloat(v) || 0).toFixed(2) }
 
 onMounted(() => { reloadList() })
 
-function reloadList() {
-  allList.value = getAllSKUs()
-  onSearch()
+async function reloadList() {
+  loading.value = true
+  errorMsg.value = ''
+  try {
+    filteredList.value = await searchSKUs(searchQuery.value)
+  } catch (e) {
+    errorMsg.value = 'SKU の読み込みに失敗しました'
+  } finally {
+    loading.value = false
+  }
 }
 
-function onSearch() {
-  filteredList.value = searchSKUs(searchQuery.value)
+async function onSearch() {
+  loading.value = true
+  try {
+    filteredList.value = await searchSKUs(searchQuery.value)
+  } finally {
+    loading.value = false
+  }
 }
 
 function selectSKU(sku) {
@@ -164,10 +183,10 @@ function selectSKU(sku) {
     id:        sku.id,
     skuCode:   sku.skuCode,
     name:      sku.name,
-    width:     sku.width,
-    depth:     sku.depth,
-    height:    sku.height,
-    weight:    sku.weight ?? 0,
+    width:     parseFloat(sku.width) || 0.40,
+    depth:     parseFloat(sku.depth) || 0.30,
+    height:    parseFloat(sku.height) || 0.30,
+    weight:    parseFloat(sku.weight) || 0,
     stackable: sku.stackable ?? true,
     maxStack:  sku.maxStack ?? 3,
   })
@@ -194,38 +213,52 @@ function cancelEdit() {
   selectedId.value = null
 }
 
-function saveSKU() {
+async function saveSKU() {
   if (!isFormValid.value) return
-  const saved = {
-    id:        form.id || undefined,
-    skuCode:   form.skuCode.trim(),
-    name:      form.name.trim(),
-    width:     form.width,
-    depth:     form.depth,
-    height:    form.height,
-    weight:    form.weight,
-    stackable: form.stackable,
-    maxStack:  form.maxStack,
+  loading.value = true
+  errorMsg.value = ''
+  try {
+    const payload = {
+      skuCode:   form.skuCode.trim(),
+      name:      form.name.trim(),
+      width:     form.width,
+      depth:     form.depth,
+      height:    form.height,
+      weight:    form.weight,
+      stackable: form.stackable,
+      maxStack:  form.maxStack,
+    }
+    const saved = await storeSave(form.id ? { id: form.id, ...payload } : payload)
+    form.id = saved.id
+    selectedId.value = saved.id
+    await reloadList()
+  } catch (e) {
+    errorMsg.value = '保存に失敗しました'
+  } finally {
+    loading.value = false
   }
-  const id = storeSave(saved)
-  form.id = id
-  selectedId.value = id
-  reloadList()
 }
 
-function confirmDelete() {
+async function confirmDelete() {
   if (!form.id) return
   if (!confirm(`「${form.name}」を削除しますか？`)) return
-  storeDelete(form.id)
-  form.editing = false
-  selectedId.value = null
-  reloadList()
+  loading.value = true
+  try {
+    await storeDelete(form.id)
+    form.editing = false
+    selectedId.value = null
+    await reloadList()
+  } catch (e) {
+    errorMsg.value = '削除に失敗しました'
+  } finally {
+    loading.value = false
+  }
 }
 
-function placeBox() {
+async function placeBox() {
   if (!isFormValid.value) return
-  // 未保存なら先に保存
-  if (!form.id) saveSKU()
+  if (!form.id) await saveSKU()
+  if (!form.id) return  // 保存失敗時は中止
   emit('place-box', {
     skuCode:   form.skuCode.trim(),
     width:     form.width,
@@ -357,6 +390,10 @@ function placeBox() {
 .form-preview {
   padding: 8px 12px; background: #f0f6ff; border-radius: 7px;
   font-size: 11px; color: #4a6090; font-weight: 500;
+}
+.form-error {
+  padding: 7px 12px; background: #fff5f5; border: 1px solid #f0cccc;
+  border-radius: 6px; font-size: 12px; color: #cc4444;
 }
 
 /* ─── フォームアクション ──────────────────────── */

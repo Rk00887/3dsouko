@@ -1,45 +1,19 @@
 /**
- * 商品マスタ（SKU）のローカル永続化ストア
- *
- * データ形式:
- * {
- *   id, skuCode, name,
- *   width, depth, height,  // 箱の寸法 (m)
- *   weight,                // 重量 (kg)
- *   stackable, maxStack,
- *   createdAt
- * }
+ * 商品マスタ（SKU）ストア
+ * バックエンド REST API (/api/skus) を使用
  */
 
-const SKU_KEY = 'warehouse_skus'
-
-function _loadAll() {
-  try { return JSON.parse(localStorage.getItem(SKU_KEY) || '[]') }
-  catch { return [] }
-}
-
-function _saveAll(all) {
-  localStorage.setItem(SKU_KEY, JSON.stringify(all))
-}
-
-function _newId() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 6)
-}
+import { skuApi } from '../api/client.js'
 
 /** 全SKU取得 */
-export function getAllSKUs() {
-  return _loadAll()
+export async function getAllSKUs() {
+  return skuApi.list()
 }
 
-/** ID 指定取得 */
-export function getSKU(id) {
-  return _loadAll().find((s) => s.id === id) ?? null
-}
-
-/** テキスト検索（コード・名前）*/
-export function searchSKUs(query) {
+/** テキスト検索（コード・名前）- クライアント側フィルタ */
+export async function searchSKUs(query) {
+  const all = await skuApi.list()
   const q = (query || '').trim().toLowerCase()
-  const all = _loadAll()
   if (!q) return all
   return all.filter(
     (s) =>
@@ -50,25 +24,16 @@ export function searchSKUs(query) {
 
 /**
  * SKU を保存（id があれば更新、なければ新規作成）
- * @returns {string} 保存した id
+ * @returns {Promise<object>} 保存した SKU オブジェクト
  */
-export function saveSKU(sku) {
-  const all = _loadAll()
+export async function saveSKU(sku) {
   if (sku.id) {
-    const idx = all.findIndex((s) => s.id === sku.id)
-    if (idx >= 0) { all[idx] = { ...all[idx], ...sku } }
-    else { all.push({ ...sku }) }
-    _saveAll(all)
-    return sku.id
-  } else {
-    const newSku = { ...sku, id: _newId(), createdAt: new Date().toISOString() }
-    all.push(newSku)
-    _saveAll(all)
-    return newSku.id
+    return skuApi.update(sku.id, sku)
   }
+  return skuApi.create(sku)
 }
 
 /** SKU 削除 */
-export function deleteSKU(id) {
-  _saveAll(_loadAll().filter((s) => s.id !== id))
+export async function deleteSKU(id) {
+  return skuApi.delete(id)
 }

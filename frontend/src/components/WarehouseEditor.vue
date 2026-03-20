@@ -308,21 +308,21 @@
     <!-- 在庫管理パネル -->
     <InventoryPanel v-if="showInventory" @close="showInventory=false" />
 
-    <!-- 添加架子弹窗 -->
+    <!-- ラック追加ダイアログ -->
     <AddShelfDialog
       v-if="showAddShelfDialog"
       @confirm="onAddShelfConfirm"
       @cancel="showAddShelfDialog = false"
     />
 
-    <!-- 添加托盘弹窗 -->
+    <!-- パレット追加ダイアログ -->
     <AddPalletDialog
       v-if="showAddPalletDialog"
       @confirm="onAddPalletConfirm"
       @cancel="showAddPalletDialog = false"
     />
 
-    <!-- 添加箱子弹窗 -->
+    <!-- カートンケース追加ダイアログ -->
     <AddBoxDialog
       v-if="showAddBoxDialog"
       @confirm="onAddBoxConfirm"
@@ -467,22 +467,22 @@
           </div>
         </template>
 
-        <!-- ── 架子属性 ── -->
+        <!-- ── ラック属性 ── -->
         <template v-if="selectedInfo.type === 'rack'">
           <div class="prop-group">
-            <div class="prop-label">长 ({{ globalUnit }})</div>
+            <div class="prop-label">幅 ({{ globalUnit }})</div>
             <input class="prop-input" type="number" :step="dimStep" min="0.1"
               :value="dispV(selectedInfo.width)"
               @change="onDimChange('width', $event)" />
           </div>
           <div class="prop-group">
-            <div class="prop-label">宽 ({{ globalUnit }})</div>
+            <div class="prop-label">奥行 ({{ globalUnit }})</div>
             <input class="prop-input" type="number" :step="dimStep" min="0.1"
               :value="dispV(selectedInfo.depth)"
               @change="onDimChange('depth', $event)" />
           </div>
           <div class="prop-group">
-            <div class="prop-label">高 ({{ globalUnit }})</div>
+            <div class="prop-label">高さ ({{ globalUnit }})</div>
             <input class="prop-input" type="number" :step="dimStep" min="0.1"
               :value="dispV(selectedInfo.height)"
               @change="onDimChange('height', $event)" />
@@ -494,7 +494,7 @@
               @change="onPropChange({ levels: Math.max(1, +$event.target.value) })" />
           </div>
           <div class="prop-group">
-            <div class="prop-label">纵向隔板 (每段)</div>
+            <div class="prop-label">縦仕切り (段あたり)</div>
             <input class="prop-input" type="number" step="1" min="0" max="10"
               :value="selectedInfo.shelvesPerLevel ?? 0"
               @change="onPropChange({ shelvesPerLevel: Math.max(0, +$event.target.value) })" />
@@ -509,7 +509,7 @@
           <!-- 各段の個別設定 -->
           <template v-if="selectedInfo.levelHeights?.length">
             <div class="prop-levels-header">
-              <span>段</span><span>高 ({{ globalUnit }})</span><span>隔板</span>
+              <span>段</span><span>高さ ({{ globalUnit }})</span><span>仕切り</span>
             </div>
             <div
               v-for="(lh, i) in selectedInfo.levelHeights"
@@ -528,22 +528,22 @@
           <button class="btn-binpack" @click="showBinPack = true">📦 3D積付シミュレーション</button>
         </template>
 
-        <!-- ── 托盘属性 ── -->
+        <!-- ── パレット属性 ── -->
         <template v-if="selectedInfo.type === 'pallet'">
           <div class="prop-group">
-            <div class="prop-label">长 ({{ globalUnit }})</div>
+            <div class="prop-label">幅 ({{ globalUnit }})</div>
             <input class="prop-input" type="number" :step="dimStep" min="0.1"
               :value="dispV(selectedInfo.width)"
               @change="onDimChange('width', $event)" />
           </div>
           <div class="prop-group">
-            <div class="prop-label">宽 ({{ globalUnit }})</div>
+            <div class="prop-label">奥行 ({{ globalUnit }})</div>
             <input class="prop-input" type="number" :step="dimStep" min="0.1"
               :value="dispV(selectedInfo.depth)"
               @change="onDimChange('depth', $event)" />
           </div>
           <div class="prop-group">
-            <div class="prop-label">高 ({{ globalUnit }})</div>
+            <div class="prop-label">高さ ({{ globalUnit }})</div>
             <input class="prop-input" type="number" :step="dimStep" min="0.01"
               :value="dispV(selectedInfo.height)"
               @change="onDimChange('height', $event)" />
@@ -557,22 +557,22 @@
           <button class="btn-binpack" @click="showBinPack = true">📦 3D積付シミュレーション</button>
         </template>
 
-        <!-- ── 箱子属性 ── -->
+        <!-- ── カートンケース属性 ── -->
         <template v-if="selectedInfo.type === 'box'">
           <div class="prop-group">
-            <div class="prop-label">长 ({{ globalUnit }})</div>
+            <div class="prop-label">幅 ({{ globalUnit }})</div>
             <input class="prop-input" type="number" :step="dimStep" min="0.01"
               :value="dispV(selectedInfo.width)"
               @change="onDimChange('width', $event)" />
           </div>
           <div class="prop-group">
-            <div class="prop-label">宽 ({{ globalUnit }})</div>
+            <div class="prop-label">奥行 ({{ globalUnit }})</div>
             <input class="prop-input" type="number" :step="dimStep" min="0.01"
               :value="dispV(selectedInfo.depth)"
               @change="onDimChange('depth', $event)" />
           </div>
           <div class="prop-group">
-            <div class="prop-label">高 ({{ globalUnit }})</div>
+            <div class="prop-label">高さ ({{ globalUnit }})</div>
             <input class="prop-input" type="number" :step="dimStep" min="0.01"
               :value="dispV(selectedInfo.height)"
               @change="onDimChange('height', $event)" />
@@ -584,16 +584,16 @@
               @change="onPropChange({ weight: Math.max(0, +$event.target.value) })" />
           </div>
           <div class="prop-group">
-            <div class="prop-label">可堆叠</div>
+            <div class="prop-label">積み重ね可</div>
             <label class="prop-checkbox-label">
               <input type="checkbox"
                 :checked="selectedInfo.stackable"
                 @change="onPropChange({ stackable: $event.target.checked })" />
-              <span>{{ selectedInfo.stackable ? '是' : '否' }}</span>
+              <span>{{ selectedInfo.stackable ? 'はい' : 'いいえ' }}</span>
             </label>
           </div>
           <div v-if="selectedInfo.stackable" class="prop-group">
-            <div class="prop-label">最大堆叠层数</div>
+            <div class="prop-label">最大積み重ね段数</div>
             <input class="prop-input" type="number" step="1" min="1" max="20"
               :value="selectedInfo.maxStack ?? 1"
               @change="onPropChange({ maxStack: Math.max(1, +$event.target.value) })" />

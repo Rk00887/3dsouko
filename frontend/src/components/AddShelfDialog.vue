@@ -2,7 +2,7 @@
   <div class="modal-overlay">
     <div class="modal">
 
-      <div class="modal-title">添加架子</div>
+      <div class="modal-title">ラックを追加</div>
 
       <!-- 预设选择 -->
       <div class="preset-row">
@@ -15,9 +15,9 @@
         </button>
       </div>
 
-      <!-- 参数表单 -->
+      <!-- パラメーター入力 -->
       <div class="form-grid">
-        <label>长 ({{ unit }})</label>
+        <label>幅 ({{ unit }})</label>
         <input
           v-model.number="display.width"
           type="number"
@@ -25,7 +25,7 @@
           @input="onDimInput('width')"
         />
 
-        <label>宽 ({{ unit }})</label>
+        <label>奥行 ({{ unit }})</label>
         <input
           v-model.number="display.depth"
           type="number"
@@ -33,7 +33,7 @@
           @input="onDimInput('depth')"
         />
 
-        <label>高 ({{ unit }})</label>
+        <label>高さ ({{ unit }})</label>
         <input
           v-model.number="display.height"
           type="number"
@@ -48,7 +48,7 @@
           @input="selectedPreset = 'custom'"
         />
 
-        <label>纵向隔板</label>
+        <label>縦仕切り</label>
         <input
           v-model.number="form.shelvesPerLevel"
           type="number" step="1" min="0" max="10"
@@ -63,19 +63,19 @@
         />
       </div>
 
-      <!-- 预览信息 -->
+      <!-- プレビュー情報 -->
       <div class="preview-info">
-        <span>单段高 <strong>{{ segmentHeight }}</strong> {{ unit }}</span>
+        <span>1段高さ <strong>{{ segmentHeight }}</strong> {{ unit }}</span>
         <span class="sep">·</span>
-        <span v-if="form.shelvesPerLevel > 0">每段 <strong>{{ form.shelvesPerLevel }}</strong> 纵隔</span>
-        <span v-else class="tag-no-divider">无纵隔</span>
+        <span v-if="form.shelvesPerLevel > 0">段あたり <strong>{{ form.shelvesPerLevel }}</strong> 縦仕切り</span>
+        <span v-else class="tag-no-divider">縦仕切りなし</span>
         <span class="sep">·</span>
-        <span>重 <strong>{{ form.weight }}</strong> kg</span>
+        <span>重量 <strong>{{ form.weight }}</strong> kg</span>
       </div>
 
       <div class="modal-actions">
-        <button class="modal-btn" @click="$emit('cancel')">取消</button>
-        <button class="modal-btn primary" @click="confirm">添加到场景</button>
+        <button class="modal-btn" @click="$emit('cancel')">キャンセル</button>
+        <button class="modal-btn primary" @click="confirm">シーンに追加</button>
       </div>
     </div>
   </div>
@@ -101,13 +101,13 @@ function onDimInput(field) {
   selectedPreset.value = 'custom'
 }
 
-// ─── 预览：单段高（当前单位） ─────────────────────────
+// ─── プレビュー：1段高さ（現在の単位） ──────────────────
 const segmentHeight = computed(() => {
   const h = form.height / form.levels
   return toDisplay(h)
 })
 
-// ─── 预设 ─────────────────────────────────────────────
+// ─── プリセット ───────────────────────────────────────────
 const presets = [
   { key: 'standard', label: '标准棚 1.2m', width: 1.2, depth: 0.6, height: 2.4, levels: 4, shelvesPerLevel: 0, weight: 0 },
   { key: 'large',    label: '重量棚 1.8m', width: 1.8, depth: 0.8, height: 3.0, levels: 5, shelvesPerLevel: 0, weight: 0 },
@@ -128,7 +128,7 @@ function applyPreset(p) {
   DIM_FIELDS.forEach((f) => { display[f] = toDisplay(form[f]) })
 }
 
-// ─── 确认：emit 始终是 m ──────────────────────────────
+// ─── 確定：emit は常に m 単位 ────────────────────────────
 function confirm() {
   emit('confirm', { ...form })
 }
@@ -259,7 +259,7 @@ function confirm() {
   background: #fff;
 }
 
-/* 预览信息 */
+/* プレビュー情報 */
 .preview-info {
   display: flex;
   align-items: center;

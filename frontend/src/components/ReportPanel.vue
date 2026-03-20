@@ -19,11 +19,13 @@
       <section class="rp-section">
         <div class="rp-section-title">倉庫概要</div>
         <table class="rp-table">
-          <tr><td>倉庫名</td><td>{{ summary.name }}</td></tr>
-          <tr><td>幅</td><td>{{ summary.width }} m</td></tr>
-          <tr><td>奥行</td><td>{{ summary.depth }} m</td></tr>
-          <tr><td>高さ</td><td>{{ summary.height }} m</td></tr>
-          <tr><td>総面積</td><td>{{ summary.area }} ㎡</td></tr>
+          <tbody>
+            <tr><td>倉庫名</td><td>{{ summary.name }}</td></tr>
+            <tr><td>幅</td><td>{{ summary.width }} m</td></tr>
+            <tr><td>奥行</td><td>{{ summary.depth }} m</td></tr>
+            <tr><td>高さ</td><td>{{ summary.height }} m</td></tr>
+            <tr><td>総面積</td><td>{{ summary.area }} ㎡</td></tr>
+          </tbody>
         </table>
       </section>
 

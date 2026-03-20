@@ -19,10 +19,10 @@ export class Sku {
   abcRank: string   // A / B / C
 
   @Column('decimal', { precision: 8, scale: 3, nullable: true })
-  length: number
+  width: number
 
   @Column('decimal', { precision: 8, scale: 3, nullable: true })
-  width: number
+  depth: number
 
   @Column('decimal', { precision: 8, scale: 3, nullable: true })
   height: number
@@ -32,6 +32,12 @@ export class Sku {
 
   @Column({ default: 1 })
   boxQty: number
+
+  @Column({ default: true })
+  stackable: boolean
+
+  @Column({ default: 3 })
+  maxStack: number
 
   @Column({ default: true })
   isActive: boolean
